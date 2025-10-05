@@ -3,6 +3,7 @@ import React from 'react';
 
 type Score = { correct: number; total: number };
 
+
 type ResultsProps = {
     provinceScore: Score;
     regionScore: Score;
@@ -11,7 +12,20 @@ type ResultsProps = {
     onRestart: () => void;
 };
 
+function getVerdict(score: number, total: number) {
+    const perc = total > 0 ? (score / total) * 100 : 0;
+    if (perc >= 90) return {label: '🌟 Uitstekend!', bg: '#dcfce7', border: '#86efac', color: '#065f46'};
+    if (perc >= 80) return {label: '🎯 Zeer goed!', bg: '#dbeafe', border: '#93c5fd', color: '#1e3a8a'};
+    if (perc >= 70) return {label: '👍 Goed', bg: '#fef9c3', border: '#fde68a', color: '#92400e'};
+    if (perc >= 60) return {label: '🙂 Matig', bg: '#ffedd5', border: '#fdba74', color: '#7c2d12'};
+    if (perc >= 50) return {label: '⚠️ Onvoldoende', bg: '#ffe4e6', border: '#fda4af', color: '#9f1239'};
+    return {label: '❌ Niet geslaagd', bg: '#fee2e2', border: '#fecaca', color: '#7f1d1d'};
+}
+
 export default function Results({provinceScore, regionScore, capitalScore, regCount, onRestart}: ResultsProps) {
+    const totalCorrect = provinceScore.correct + regionScore.correct + capitalScore.correct;
+    const totalMax = (provinceScore.total || 10) + (regionScore.total || regCount) + capitalScore.total;
+    const verdict = getVerdict(totalCorrect, totalMax);
     return (
         <div style={{
             background: '#fff',
@@ -36,6 +50,22 @@ export default function Results({provinceScore, regionScore, capitalScore, regCo
         <span style={{color: '#0f766e', fontWeight: 600}}>
           Totaalscore: {(provinceScore.correct + regionScore.correct + capitalScore.correct).toFixed(1)}/{((provinceScore.total || 10) + (regionScore.total || regCount) + capitalScore.total).toFixed(1)}
         </span>
+            </div>
+            <div style={{marginBottom: 20}}>
+              <span
+                  style={{
+                      display: 'inline-block',
+                      padding: '6px 10px',
+                      borderRadius: 9999,
+                      background: verdict.bg,
+                      border: `1px solid ${verdict.border}`,
+                      color: verdict.color,
+                      fontWeight: 600,
+                      fontSize: 14,
+                  }}
+              >
+                {verdict.label}
+              </span>
             </div>
             <button
                 onClick={onRestart}
