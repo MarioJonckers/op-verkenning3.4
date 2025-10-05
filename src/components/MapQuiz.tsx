@@ -116,67 +116,64 @@ export default function MapQuiz(props: MapQuizProps) {
                 )}
             </div>
 
-            {/* Chips + Volgende */}
+            {/* Chips */}
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                overflowX: 'auto',
-                WebkitOverflowScrolling: 'touch',
+                gap: 8,
+                flexWrap: 'wrap',
                 padding: '8px 4px'
               }}
             >
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'nowrap' }}>
-                {(phase === 'provinces' ? (Object.keys(NAMES) as string[]) : (REG_KEYS as string[])).map((key) => {
-                  const val = results[key as string];
-                  const base = {
-                    padding: '10px 14px',
-                    borderRadius: 9999,
-                    border: '1px solid #e2e8f0',
-                    fontSize: 16,
-                    lineHeight: '20px',
-                    whiteSpace: 'nowrap'
-                  } as React.CSSProperties;
-                  let bg = '#fff', color = '#0f172a', border = '#e2e8f0';
-                  if (val === true) {
-                    bg = '#dcfce7';
-                    border = '#86efac';
-                  } else if (val === false) {
-                    bg = '#fee2e2';
-                    border = '#fecaca';
-                  }
-                  const label = phase === 'provinces' ? NAMES[key as keyof typeof NAMES].nl : (key as RegionKey);
-                  return (
-                    <span key={key} style={{...base, background: bg, borderColor: border, color}}>
-                      {label}
-                    </span>
-                  );
-                })}
-              </div>
-
-              {finished && (
-                <div style={{ flex: '0 0 auto' }}>
-                  <button
-                    onClick={nextRound}
-                    style={{
-                      padding: '10px 12px',
-                      borderRadius: 8,
-                      border: '1px solid #4f46e5',
-                      background: '#6366f1',
-                      color: '#fff',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 6,
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    <ArrowRight size={16} /> Volgende
-                  </button>
-                </div>
-              )}
+              {(phase === 'provinces' ? (Object.keys(NAMES) as string[]) : (REG_KEYS as string[])).map((key) => {
+                const val = results[key as string];
+                const base = {
+                  padding: '10px 14px',
+                  borderRadius: 9999,
+                  border: '1px solid #e2e8f0',
+                  fontSize: 16,
+                  lineHeight: '20px',
+                  whiteSpace: 'nowrap'
+                } as React.CSSProperties;
+                let bg = '#fff', color = '#0f172a', border = '#e2e8f0';
+                if (val === true) {
+                  bg = '#dcfce7';
+                  border = '#86efac';
+                } else if (val === false) {
+                  bg = '#fee2e2';
+                  border = '#fecaca';
+                }
+                const label = phase === 'provinces' ? NAMES[key as keyof typeof NAMES].nl : (key as RegionKey);
+                return (
+                  <span key={key} style={{...base, background: bg, borderColor: border, color}}>
+                    {label}
+                  </span>
+                );
+              })}
             </div>
+
+            {/* Volgende knop apart, zodat hij altijd zichtbaar is */}
+            {finished && (
+              <div style={{ padding: '4px', display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  onClick={nextRound}
+                  style={{
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    border: '1px solid #4f46e5',
+                    background: '#6366f1',
+                    color: '#fff',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <ArrowRight size={16} /> Volgende
+                </button>
+              </div>
+            )}
         </>
     );
 }
