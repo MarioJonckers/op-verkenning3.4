@@ -1,6 +1,6 @@
 // src/components/CapitalsQuiz.tsx
-import React from 'react';
-import {ArrowRight} from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, Undo2 } from 'lucide-react';
 
 type ProvinceKey = string;
 
@@ -48,6 +48,46 @@ export default function CapitalsQuiz(props: CapitalsQuizProps) {
         setScore, finished, setFinished, setShowResults,
     } = props;
 
+    // --- Undo history ---
+    type Snapshot = {
+        capRows: CapitalRow[];
+        capProvincesPool: ProvinceKey[];
+        capCapitalsPool: string[];
+        finished: boolean;
+        capitalCorrect: number;
+        scoreCorrect: number;
+    };
+    const [history, setHistory] = useState<Snapshot[]>([]);
+
+    const pushHistory = () => {
+        setHistory(prev => [
+            ...prev,
+            {
+                capRows: JSON.parse(JSON.stringify(capRows)),
+                capProvincesPool: [...capProvincesPool],
+                capCapitalsPool: [...capCapitalsPool],
+                finished,
+                capitalCorrect: capitalScore.correct,
+                scoreCorrect: capitalScore.correct, // score in parent gespiegeld
+            },
+        ]);
+    };
+
+    const undo = () => {
+        setHistory(prev => {
+            if (prev.length === 0) return prev;
+            const snap = prev[prev.length - 1];
+            // herstel state
+            setCapRows(snap.capRows);
+            setCapProvincesPool(snap.capProvincesPool);
+            setCapCapitalsPool(snap.capCapitalsPool);
+            setFinished(snap.finished);
+            setCapitalScore({ correct: snap.capitalCorrect, total: 10.5 });
+            setScore({ correct: snap.scoreCorrect, total: 10.5 });
+            return prev.slice(0, -1);
+        });
+    };
+
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 12, alignItems: 'start' }}>
             {/* Linkerkolom: provincies */}
@@ -69,7 +109,24 @@ export default function CapitalsQuiz(props: CapitalsQuizProps) {
 
             {/* Middenkolom: Tabel */}
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', padding: 16 }}>
-                <div style={{ fontWeight: 600, marginBottom: 8 }}>Koppel per rij: Provincie &amp; Hoofdplaats</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <div style={{ fontWeight: 600 }}>Koppel per rij: Provincie &amp; Hoofdplaats</div>
+                    <button
+                        onClick={undo}
+                        disabled={history.length === 0}
+                        title={history.length ? `Undo (${history.length})` : 'Niets om ongedaan te maken'}
+                        style={{
+                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                            padding: '6px 10px', borderRadius: 8,
+                            border: '1px solid #94a3b8',
+                            background: history.length ? '#fff' : '#f1f5f9',
+                            color: history.length ? '#0f172a' : '#94a3b8',
+                            cursor: history.length ? 'pointer' : 'not-allowed'
+                        }}
+                    >
+                        <Undo2 size={16} />
+                    </button>
+                </div>
                 <div style={{ width: '100%', overflowX: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
@@ -119,6 +176,7 @@ export default function CapitalsQuiz(props: CapitalsQuizProps) {
                                 })();
                                 if (!data || data.kind !== 'province') return;
                                 const droppedProv = data.value as ProvinceKey;
+                                pushHistory();
                                 setCapProvincesPool(pool => pool.filter(v => v !== droppedProv));
                                 const newRow = { ...row, province: droppedProv };
                                 setCapRows(prev => { const copy = [...prev]; copy[i] = newRow; return copy; });
@@ -136,6 +194,7 @@ export default function CapitalsQuiz(props: CapitalsQuizProps) {
                                 })();
                                 if (!data || data.kind !== 'capital') return;
                                 const droppedCap = data.value;
+                                pushHistory();
                                 setCapCapitalsPool(pool => pool.filter(v => v !== droppedCap));
                                 const newRow = { ...row, capital: droppedCap };
                                 setCapRows(prev => { const copy = [...prev]; copy[i] = newRow; return copy; });
