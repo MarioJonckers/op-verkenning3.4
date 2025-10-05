@@ -12,6 +12,10 @@ export const baseCss = `
 export const globalReset = `
   html, body, #root { height: 100%; margin: 0; padding: 0; overflow-x: hidden; }
   *, *::before, *::after { box-sizing: border-box; }
+  /* mobile polish */
+  * { -webkit-tap-highlight-color: transparent; }
+  button, input, select { font-size: 16px; touch-action: manipulation; }
+  html, body { overscroll-behavior: contain; }
 `;
 
 export const styles: Record<string, React.CSSProperties> = {
@@ -24,7 +28,8 @@ export const styles: Record<string, React.CSSProperties> = {
         color: '#0f172a',
         padding: 0,
         margin: 0,
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        overflowY: 'auto',        // <— voor mobiel scrollen
     },
     container: {
         width: '100%',
@@ -35,7 +40,7 @@ export const styles: Record<string, React.CSSProperties> = {
         gap: 0,
         overflow: 'hidden'
     },
-    left: {width: '100%', height: '100%', overflow: 'hidden'},
+    left: { width: '100%', height: '100%', overflow: 'auto' }, // was 'hidden'
     right: {display: 'grid', gap: 16},
     card: {
         background: '#fff',
@@ -90,7 +95,7 @@ export const styles: Record<string, React.CSSProperties> = {
         alignItems: 'center',
         justifyContent: 'center'
     },
-    mapWrap: {width: '100%', height: '70vh', borderRadius: 12, overflow: 'hidden', background: '#f8fafc'},
+    mapWrap: { width: '100%', height: '60vh', borderRadius: 12, overflow: 'hidden', background: '#f8fafc' },
     input: {flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid #cbd5e1'},
     grid: {display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8},
     tile: {

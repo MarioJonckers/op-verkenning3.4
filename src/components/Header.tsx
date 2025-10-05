@@ -69,8 +69,8 @@ export default function Header({
                             : <>Klik
                                 op: {question ? (question.kind === 'provinces' ? NAMES[question.key as ProvinceKey].nl : (question.key as RegionKey)) : '...'}</>}
                     </div>
-                    <div style={{marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8}}>
-                        <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, position: 'sticky', top: 8, zIndex: 5 }}>
+                    <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
                             <div style={{fontSize: 12, background: '#eef2ff', padding: '4px 8px', borderRadius: 8}}>
                                 Score: {scoreNum}/{scoreDen}
                             </div>

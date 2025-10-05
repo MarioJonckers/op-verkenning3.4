@@ -45,7 +45,7 @@ export default function MapQuiz(props: MapQuizProps) {
     return (
         <>
             {/* Kaart */}
-            <div style={{width: '100%', height: '70vh', borderRadius: 12, overflow: 'hidden', background: '#f8fafc'}}>
+            <div style={{width: '100%', height: '60vh', borderRadius: 12, overflow: 'hidden', background: '#f8fafc'}}>
                 {loading && <div style={{padding: 12}}>Kaart laden…</div>}
                 {error && <div style={{color: '#b91c1c', fontSize: 14}}>{error}</div>}
                 {!loading && geo && (
@@ -99,7 +99,7 @@ export default function MapQuiz(props: MapQuizProps) {
                                                         fill,
                                                         outline: "none",
                                                         stroke,
-                                                        strokeWidth: 0.5,
+                                                        strokeWidth: 0.8,
                                                         cursor: isClickable ? 'pointer' : 'default'
                                                     },
                                                     hover: {fill, outline: "none"},
@@ -117,47 +117,65 @@ export default function MapQuiz(props: MapQuizProps) {
             </div>
 
             {/* Chips + Volgende */}
-            <div style={{marginTop: 12}}>
-                <div style={{display: 'flex', flexWrap: 'wrap', gap: 8, maxWidth: '100%'}}>
-                    {(phase === 'provinces' ? (Object.keys(NAMES) as string[]) : (REG_KEYS as string[])).map((key) => {
-                        const val = results[key as string];
-                        const base = {
-                            padding: '6px 10px',
-                            borderRadius: 9999,
-                            border: '1px solid #e2e8f0',
-                            fontSize: 12
-                        } as React.CSSProperties;
-                        let bg = '#fff', color = '#0f172a', border = '#e2e8f0';
-                        if (val === true) {
-                            bg = '#dcfce7';
-                            border = '#86efac';
-                        } else if (val === false) {
-                            bg = '#fee2e2';
-                            border = '#fecaca';
-                        }
-                        const label = phase === 'provinces' ? NAMES[key as keyof typeof NAMES].nl : (key as RegionKey);
-                        return (
-                            <span key={key} style={{...base, background: bg, borderColor: border, color}}>
-                {label}
-              </span>
-                        );
-                    })}
-                </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                overflowX: 'auto',
+                WebkitOverflowScrolling: 'touch',
+                padding: '8px 4px'
+              }}
+            >
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'nowrap' }}>
+                {(phase === 'provinces' ? (Object.keys(NAMES) as string[]) : (REG_KEYS as string[])).map((key) => {
+                  const val = results[key as string];
+                  const base = {
+                    padding: '10px 14px',
+                    borderRadius: 9999,
+                    border: '1px solid #e2e8f0',
+                    fontSize: 16,
+                    lineHeight: '20px',
+                    whiteSpace: 'nowrap'
+                  } as React.CSSProperties;
+                  let bg = '#fff', color = '#0f172a', border = '#e2e8f0';
+                  if (val === true) {
+                    bg = '#dcfce7';
+                    border = '#86efac';
+                  } else if (val === false) {
+                    bg = '#fee2e2';
+                    border = '#fecaca';
+                  }
+                  const label = phase === 'provinces' ? NAMES[key as keyof typeof NAMES].nl : (key as RegionKey);
+                  return (
+                    <span key={key} style={{...base, background: bg, borderColor: border, color}}>
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
 
-                {finished && (
-                    <div style={{marginTop: 12}}>
-                        <button onClick={nextRound} style={{
-                            padding: '6px 10px',
-                            borderRadius: 8,
-                            border: '1px solid #4f46e5',
-                            background: '#6366f1',
-                            color: '#fff',
-                            cursor: 'pointer'
-                        }}>
-                            <ArrowRight size={16} style={{marginRight: 6}}/> Volgende
-                        </button>
-                    </div>
-                )}
+              {finished && (
+                <div style={{ flex: '0 0 auto' }}>
+                  <button
+                    onClick={nextRound}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: 8,
+                      border: '1px solid #4f46e5',
+                      background: '#6366f1',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    <ArrowRight size={16} /> Volgende
+                  </button>
+                </div>
+              )}
             </div>
         </>
     );
