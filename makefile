@@ -5,6 +5,7 @@ IMAGE_NAME    := belgische-quiz
 
 # Pak versie uit package.json (fallback naar git tag)
 VERSION := $(shell node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")
+BUILD_ARGS := --build-arg APP_VERSION=$(VERSION)
 
 # Multi-arch buildx builder (eenmalig run je `make builder`)
 builder:
@@ -17,6 +18,7 @@ publish: builder
 		--platform linux/amd64,linux/arm64 \
 		-t $(REGISTRY_USER)/$(IMAGE_NAME):$(VERSION) \
 		-t $(REGISTRY_USER)/$(IMAGE_NAME):latest \
+		$(BUILD_ARGS) \
 		--push .
 
 # Handige combo: bump patch + push code + build en push images
