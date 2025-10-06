@@ -19,6 +19,9 @@ const EXPECT = {
     neighbors: [
         'alken', 'wellen', 'borgloon', 'heers', 'gingelom', 'landen', 'zoutleeuw', 'nieuwerkerken'
     ].map(norm),
+    d2a: 'vlaanderen',
+    d2b: 'wallonie',       // "Wallonië" -> zonder accent
+    d2c: 'vlaamsbrabant', // "Vlaams-Brabant"
 };
 
 export type QuestionsProps = {
@@ -42,14 +45,17 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
         n8: '',
         n9: '',
         n10: '',
-        n11: ''
+        n11: '',
+        d2a: '',
+        d2b: '',
+        d2c: ''
     });
     const [checked, setChecked] = useState(false);
 
     useEffect(() => {
         // toon direct juiste denominator voor deze sectie (indien doorgegeven)
         if (typeof setScore === 'function') {
-            setScore({ correct: 0, total: 7 });
+            setScore({ correct: 0, total: 10 });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -75,7 +81,10 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
                 seen.add(v);
             }
         });
-        return {p1ok, p2ok, p3ok, correctCount};
+        const d2aOk = norm(values.d2a) === EXPECT.d2a;
+        const d2bOk = norm(values.d2b) === EXPECT.d2b;
+        const d2cOk = norm(values.d2c) === EXPECT.d2c;
+        return {p1ok, p2ok, p3ok, d2aOk, d2bOk, d2cOk, correctCount};
     }, [checked, values, neighborUser]);
 
     const onChange = (k: keyof typeof values) =>
@@ -95,8 +104,11 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
                 seen.add(x);
             }
         });
-        const correct = (p1ok ? 1 : 0) + (p2ok ? 1 : 0) + (p3ok ? 1 : 0) + correctNeighbors * 0.5; // 3*1 + 8*0.5 = 7
-        return {correct, total: 7};
+        const d2aOk = norm(v.d2a) === EXPECT.d2a;
+        const d2bOk = norm(v.d2b) === EXPECT.d2b;
+        const d2cOk = norm(v.d2c) === EXPECT.d2c;
+        const correct = (p1ok ? 1 : 0) + (p2ok ? 1 : 0) + (p3ok ? 1 : 0) + correctNeighbors * 0.5 + (d2aOk ? 1 : 0) + (d2bOk ? 1 : 0) + (d2cOk ? 1 : 0); // 3 + 4 + 3 = 10
+        return {correct, total: 10};
     }
 
     // Compute validity for each neighbor input individually
@@ -156,7 +168,7 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
 
             {/* Vragen */}
             <div style={{background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16}}>
-                <h3 style={{marginTop: 0}}>DEEL 1 (onze school)</h3>
+                <h3 style={{marginTop: 0}}>DEEL 1 - Onze school</h3>
                 <div style={{marginTop: 0, color: '#334155', lineHeight: 1.9}}>
                     Onze school ligt in de provincie
                     <InlineInput value={values.p1} onChange={onChange('p1')} valid={checked ? evalResult?.p1ok : undefined} width={180} />.
@@ -179,6 +191,19 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
                         Buurgemeenten correct: <b>{evalResult?.correctCount}/8</b>
                     </div>
                 )}
+
+                {/* DEEL 2 */}
+                <div style={{marginTop: 18, paddingTop: 10, borderTop: '1px dashed #e2e8f0'}}>
+                  <h3 style={{marginTop: 0}}>DEEL 2 - Gewesten</h3>
+                  <div style={{marginTop: 0, color: '#334155', lineHeight: 1.9}}>
+                    Het Vlaams gewest noemen we ook
+                    <InlineInput value={values.d2a} onChange={onChange('d2a')} valid={checked ? evalResult?.d2aOk : undefined} width={200} />.
+                    Het Waals gewest noemen we ook
+                    <InlineInput value={values.d2b} onChange={onChange('d2b')} valid={checked ? evalResult?.d2bOk : undefined} width={200} />.
+                    Welke provincie grenst aan het Brussels Hoofdstedelijk gewest?
+                    <InlineInput value={values.d2c} onChange={onChange('d2c')} valid={checked ? evalResult?.d2cOk : undefined} width={220} />.
+                  </div>
+                </div>
 
                 {/* Acties */}
                 <div style={{display: 'flex', gap: 8, marginTop: 14}}>
@@ -219,6 +244,7 @@ function InlineInput({ value, onChange, valid, width = 160 }: { value: string; o
                 borderRadius: 8,
                 border: `1px solid ${border}`,
                 margin: '4px 6px',
+                verticalAlign: 'baseline',
             }}
         />
     );
