@@ -7,7 +7,7 @@ type ProvinceKey = string;
 type Question = { kind: 'provinces'; key: ProvinceKey } | { kind: 'regions'; key: RegionKey } | null;
 
 type HeaderProps = {
-    phase: 'provinces' | 'regions' | 'capitals';
+    phase: 'provinces' | 'regions' | 'capitals' | 'questions';
     showResults: boolean;
     question: Question;
     NAMES: Record<ProvinceKey, { nl: string; id: string }>;
@@ -36,13 +36,15 @@ export default function Header({
     const subtitle =
         phase === 'provinces' ? 'Provincies' :
             phase === 'regions' ? 'Gewesten' :
-                'Hoofdplaatsen';
+                phase === 'capitals' ? 'Hoofdplaatsen' :
+                    'Vragen';
 
     const scoreNum = phase === 'capitals' ? capitalScore.correct.toFixed(1) : String(score.correct);
     const scoreDen =
         phase === 'provinces' ? String(orderLen || 10)
             : phase === 'regions' ? String(regLen)
-                : capitalScore.total.toFixed(1);
+            : phase === 'capitals' ? capitalScore.total.toFixed(1)
+            : String(score.total);
 
     return (
         <>
@@ -66,8 +68,9 @@ export default function Header({
                     <div style={{fontWeight: 600}}>
                         {phase === 'capitals'
                             ? 'Sleep de provincies en hoofdplaatsen naar de juiste vakjes'
-                            : <>Klik
-                                op: {question ? (question.kind === 'provinces' ? NAMES[question.key as ProvinceKey].nl : (question.key as RegionKey)) : '...'}</>}
+                            : phase === 'questions'
+                                ? 'Beantwoord de vragen en klik op Nakijken'
+                                : <>Klik op: {question ? (question.kind === 'provinces' ? NAMES[question.key as ProvinceKey].nl : (question.key as RegionKey)) : '...'}</>}
                     </div>
                     <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, position: 'sticky', top: 8, zIndex: 5 }}>
                     <div style={{display: 'flex', alignItems: 'center', gap: 8}}>

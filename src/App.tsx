@@ -4,6 +4,7 @@ import MapQuiz from "./components/MapQuiz";
 import Results from "./components/Results";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import Questions from "./components/Questions";
 
 import {baseCss, globalReset, NUTS2_GEOJSON_URL, styles} from "./data/constants";
 import {
@@ -56,13 +57,32 @@ export default function App() {
     const [idx, setIdx] = useState(0);
     const [results, setResults] = useState<Record<string, boolean | null>>({});
     const [finished, setFinished] = useState(false);
-    const [phase, setPhase] = useState<"provinces" | "regions" | "capitals">("provinces");
+    const [phase, setPhase] = useState<"provinces" | "regions" | "capitals" | "questions">("provinces");
 
     // Nieuw: eindresultaten tonen
     const [showResults, setShowResults] = useState(false);
     // Scores opslaan voor eindresultaten
     const [provinceScore, setProvinceScore] = useState<{ correct: number; total: number }>({correct: 0, total: 0});
     const [regionScore, setRegionScore] = useState<{ correct: number; total: number }>({correct: 0, total: 0});
+    const [questionsScore, setQuestionsScore] = useState<{ correct: number; total: number }>({ correct: 0, total: 7 });
+    // Start vragen oefening
+    const startQuestions = () => {
+        setPhase("questions");
+        setAnswerState(null);
+        setHighlights([]);
+        setHoverMembers([]);
+        setFinished(false);
+        setShowResults(false);
+        setScore({ correct: 0, total: 7 });
+        setQuestionsScore({ correct: 0, total: 7 });
+        // Neem de behaalde hoofdplaatsen-score mee in de totaalscore (rondes 3/3)
+        setSession(s => ({
+          rounds: s.rounds + 1,
+          correct: s.correct + capitalScore.correct,
+          total: s.total + capitalScore.total,
+        }));
+        speak("Beantwoord de vragen en klik op Nakijken.");
+    };
 
     // ---- Hoofdplaatsen DnD state ----
     type CapitalRow = {
@@ -279,62 +299,74 @@ export default function App() {
                         {/* Resultatenpagina */}
                         {showResults ? (
                             <Results
-                                provinceScore={provinceScore}
-                                regionScore={regionScore}
-                                capitalScore={capitalScore}
-                                regCount={REG_KEYS.length}
-                                onRestart={() => {
-                                    setProvinceScore({correct: 0, total: 0});
-                                    setRegionScore({correct: 0, total: 0});
-                                    setCapitalScore({correct: 0, total: 10});
-                                    setShowResults(false);
-                                    startTest();
-                                }}
+                              provinceScore={provinceScore}
+                              regionScore={regionScore}
+                              capitalScore={capitalScore}
+                              questionsScore={questionsScore}
+                              regCount={REG_KEYS.length}
+                              onRestart={() => {
+                                  setSession({ rounds: 0, correct: 0, total: 0 });
+                                  setProvinceScore({correct: 0, total: 0});
+                                  setRegionScore({correct: 0, total: 0});
+                                  setCapitalScore({correct: 0, total: 10});
+                                  setQuestionsScore({correct: 0, total: 7});
+                                  setShowResults(false);
+                                  startTest();
+                              }}
                             />
                         ) : (
                             <div style={{...styles.card, padding: 12, borderRadius: 12}}>
-                                {phase !== "capitals" ? (
-                                    <MapQuiz
-                                        phase={phase as "provinces" | "regions"}
-                                        geo={geo}
-                                        loading={loading}
-                                        error={error}
-                                        NAMES={NAMES as any}
-                                        REGIONS={REGIONS as any}
-                                        REG_KEYS={REG_KEYS}
-                                        ALLOWED_IDS={ALLOWED_IDS}
-                                        question={question as any}
-                                        answerState={answerState}
-                                        results={results}
-                                        highlights={highlights}
-                                        hoverMembers={hoverMembers}
-                                        setHoverMembers={setHoverMembers}
-                                        onClickProvince={onClickProvince}
-                                        nextRound={nextRound}
-                                        finished={finished}
-                                    />
+                                {phase === "provinces" || phase === "regions" ? (
+                                  <MapQuiz
+                                    phase={phase as "provinces" | "regions"}
+                                    geo={geo}
+                                    loading={loading}
+                                    error={error}
+                                    NAMES={NAMES as any}
+                                    REGIONS={REGIONS as any}
+                                    REG_KEYS={REG_KEYS}
+                                    ALLOWED_IDS={ALLOWED_IDS}
+                                    question={question as any}
+                                    answerState={answerState}
+                                    results={results}
+                                    highlights={highlights}
+                                    hoverMembers={hoverMembers}
+                                    setHoverMembers={setHoverMembers}
+                                    onClickProvince={onClickProvince}
+                                    nextRound={nextRound}
+                                    finished={finished}
+                                  />
+                                ) : phase === "capitals" ? (
+                                  <CapitalsQuiz
+                                    NAMES={NAMES}
+                                    CAPITALS={CAPITALS}
+                                    FLEMISH_KEYS={FLEMISH_KEYS}
+                                    WALLOON_KEYS={WALLOON_KEYS}
+                                    BRUSSELS_CAPITAL={BRUSSELS_CAPITAL}
+                                    capProvincesPool={capProvincesPool}
+                                    setCapProvincesPool={setCapProvincesPool}
+                                    capCapitalsPool={capCapitalsPool}
+                                    setCapCapitalsPool={setCapCapitalsPool}
+                                    capRows={capRows}
+                                    setCapRows={setCapRows}
+                                    dragItem={dragItem}
+                                    setDragItem={setDragItem}
+                                    capitalScore={capitalScore}
+                                    setCapitalScore={setCapitalScore}
+                                    setScore={setScore}
+                                    finished={finished}
+                                    setFinished={setFinished}
+                                    setShowResults={(v: boolean) => { if (v) startQuestions(); }}
+                                  />
                                 ) : (
-                                    <CapitalsQuiz
-                                        NAMES={NAMES}
-                                        CAPITALS={CAPITALS}
-                                        FLEMISH_KEYS={FLEMISH_KEYS}
-                                        WALLOON_KEYS={WALLOON_KEYS}
-                                        BRUSSELS_CAPITAL={BRUSSELS_CAPITAL}
-                                        capProvincesPool={capProvincesPool}
-                                        setCapProvincesPool={setCapProvincesPool}
-                                        capCapitalsPool={capCapitalsPool}
-                                        setCapCapitalsPool={setCapCapitalsPool}
-                                        capRows={capRows}
-                                        setCapRows={setCapRows}
-                                        dragItem={dragItem}
-                                        setDragItem={setDragItem}
-                                        capitalScore={capitalScore}
-                                        setCapitalScore={setCapitalScore}
-                                        setScore={setScore}
-                                        finished={finished}
-                                        setFinished={setFinished}
-                                        setShowResults={setShowResults}
-                                    />
+                                  <Questions
+                                    geo={geo}
+                                    loading={loading}
+                                    error={error}
+                                    onFinish={() => setShowResults(true)}
+                                    setQuestionsScore={setQuestionsScore}
+                                    setScore={setScore}
+                                  />
                                 )}
                             </div>
                         )}

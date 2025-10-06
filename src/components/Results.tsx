@@ -8,6 +8,7 @@ type ResultsProps = {
     provinceScore: Score;
     regionScore: Score;
     capitalScore: Score;
+    questionsScore?: Score;
     regCount: number;
     onRestart: () => void;
 };
@@ -22,9 +23,10 @@ function getVerdict(score: number, total: number) {
     return {label: '❌ Niet geslaagd', bg: '#fee2e2', border: '#fecaca', color: '#7f1d1d'};
 }
 
-export default function Results({provinceScore, regionScore, capitalScore, regCount, onRestart}: ResultsProps) {
-    const totalCorrect = provinceScore.correct + regionScore.correct + capitalScore.correct;
-    const totalMax = (provinceScore.total || 10) + (regionScore.total || regCount) + capitalScore.total;
+export default function Results({provinceScore, regionScore, capitalScore, questionsScore, regCount, onRestart}: ResultsProps) {
+    const q = questionsScore ?? { correct: 0, total: 0 };
+    const totalCorrect = provinceScore.correct + regionScore.correct + capitalScore.correct + q.correct;
+    const totalMax = (provinceScore.total || 10) + (regionScore.total || regCount) + capitalScore.total + q.total;
     const verdict = getVerdict(totalCorrect, totalMax);
     return (
         <div style={{
@@ -46,9 +48,12 @@ export default function Results({provinceScore, regionScore, capitalScore, regCo
             <div style={{fontSize: 16, marginBottom: 12}}>
                 Hoofdplaatsenscore: <b>{capitalScore.correct.toFixed(1)}/{capitalScore.total.toFixed(1)}</b>
             </div>
+            <div style={{fontSize: 16, marginBottom: 12}}>
+                Vragenscore: <b>{q.correct.toFixed(1)}/{q.total.toFixed(1)}</b>
+            </div>
             <div style={{fontSize: 18, marginBottom: 24}}>
         <span style={{color: '#0f766e', fontWeight: 600}}>
-          Totaalscore: {(provinceScore.correct + regionScore.correct + capitalScore.correct).toFixed(1)}/{((provinceScore.total || 10) + (regionScore.total || regCount) + capitalScore.total).toFixed(1)}
+          Totaalscore: {totalCorrect.toFixed(1)}/{totalMax.toFixed(1)}
         </span>
             </div>
             <div style={{marginBottom: 20}}>
