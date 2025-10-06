@@ -22,6 +22,11 @@ const EXPECT = {
     d2a: 'vlaanderen',
     d2b: 'wallonie',       // "Wallonië" -> zonder accent
     d2c: 'vlaamsbrabant', // "Vlaams-Brabant"
+    d3a: 'oostvlaanderen',
+    d3b: 'antwerpen',
+    d3c: 'vlaamsbrabant',
+    d3d: 'waalsbrabant',
+    d3e: 'brussel',
 };
 
 export type QuestionsProps = {
@@ -48,14 +53,19 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
         n11: '',
         d2a: '',
         d2b: '',
-        d2c: ''
+        d2c: '',
+        d3a: '',
+        d3b: '',
+        d3c: '',
+        d3d: '',
+        d3e: '',
     });
     const [checked, setChecked] = useState(false);
 
     useEffect(() => {
         // toon direct juiste denominator voor deze sectie (indien doorgegeven)
         if (typeof setScore === 'function') {
-            setScore({ correct: 0, total: 10 });
+            setScore({ correct: 0, total: 15 });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -84,7 +94,12 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
         const d2aOk = norm(values.d2a) === EXPECT.d2a;
         const d2bOk = norm(values.d2b) === EXPECT.d2b;
         const d2cOk = norm(values.d2c) === EXPECT.d2c;
-        return {p1ok, p2ok, p3ok, d2aOk, d2bOk, d2cOk, correctCount};
+        const d3aOk = norm(values.d3a) === EXPECT.d3a;
+        const d3bOk = norm(values.d3b) === EXPECT.d3b;
+        const d3cOk = norm(values.d3c) === EXPECT.d3c;
+        const d3dOk = norm(values.d3d) === EXPECT.d3d;
+        const d3eOk = norm(values.d3e) === EXPECT.d3e;
+        return {p1ok, p2ok, p3ok, d2aOk, d2bOk, d2cOk, d3aOk, d3bOk, d3cOk, d3dOk, d3eOk, correctCount};
     }, [checked, values, neighborUser]);
 
     const onChange = (k: keyof typeof values) =>
@@ -107,8 +122,17 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
         const d2aOk = norm(v.d2a) === EXPECT.d2a;
         const d2bOk = norm(v.d2b) === EXPECT.d2b;
         const d2cOk = norm(v.d2c) === EXPECT.d2c;
-        const correct = (p1ok ? 1 : 0) + (p2ok ? 1 : 0) + (p3ok ? 1 : 0) + correctNeighbors * 0.5 + (d2aOk ? 1 : 0) + (d2bOk ? 1 : 0) + (d2cOk ? 1 : 0); // 3 + 4 + 3 = 10
-        return {correct, total: 10};
+        const d3aOk = norm(v.d3a) === EXPECT.d3a;
+        const d3bOk = norm(v.d3b) === EXPECT.d3b;
+        const d3cOk = norm(v.d3c) === EXPECT.d3c;
+        const d3dOk = norm(v.d3d) === EXPECT.d3d;
+        const d3eOk = norm(v.d3e) === EXPECT.d3e;
+        const correct =
+            (p1ok ? 1 : 0) + (p2ok ? 1 : 0) + (p3ok ? 1 : 0) +
+            correctNeighbors * 0.5 +
+            (d2aOk ? 1 : 0) + (d2bOk ? 1 : 0) + (d2cOk ? 1 : 0) +
+            (d3aOk ? 1 : 0) + (d3bOk ? 1 : 0) + (d3cOk ? 1 : 0) + (d3dOk ? 1 : 0) + (d3eOk ? 1 : 0);
+        return { correct, total: 15 };
     }
 
     // Compute validity for each neighbor input individually
@@ -202,6 +226,22 @@ export default function Questions({geo, loading, error, onFinish, setQuestionsSc
                     <InlineInput value={values.d2b} onChange={onChange('d2b')} valid={checked ? evalResult?.d2bOk : undefined} width={200} />.
                     Welke provincie grenst aan het Brussels Hoofdstedelijk gewest?
                     <InlineInput value={values.d2c} onChange={onChange('d2c')} valid={checked ? evalResult?.d2cOk : undefined} width={220} />.
+                  </div>
+                </div>
+
+                {/* DEEL 3 */}
+                <div style={{marginTop: 18, paddingTop: 10, borderTop: '1px dashed #e2e8f0'}}>
+                  <h3 style={{marginTop: 0}}>DEEL 3 - Provincie of hoofdplaats</h3>
+                  <div style={{marginTop: 0, color: '#334155', lineHeight: 1.9}}>
+                    <InlineInput value={values.d3a} onChange={onChange('d3a')} valid={checked ? evalResult?.d3aOk : undefined} width={220} /> grenst aan Antwerpen, Vlaams-Brabant, West-Vlaanderen en Henegouwen.
+                    <br/>
+                    <InlineInput value={values.d3b} onChange={onChange('d3b')} valid={checked ? evalResult?.d3bOk : undefined} width={220} /> grenst aan Oost-Vlaanderen, Vlaams-Brabant en Limburg.
+                    <br/>
+                    <InlineInput value={values.d3c} onChange={onChange('d3c')} valid={checked ? evalResult?.d3cOk : undefined} width={220} /> ligt midden in ons land en is Vlaams.
+                    <br/>
+                    <InlineInput value={values.d3d} onChange={onChange('d3d')} valid={checked ? evalResult?.d3dOk : undefined} width={220} /> ligt midden in ons land en is Waals.
+                    <br/>
+                    De stad <InlineInput value={values.d3e} onChange={onChange('d3e')} valid={checked ? evalResult?.d3eOk : undefined} width={180} /> ligt midden in ons land en is tweetalig. Het is de Belgische hoofdstad.
                   </div>
                 </div>
 
