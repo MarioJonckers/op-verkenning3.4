@@ -212,9 +212,10 @@ export default function App() {
         if (!question || finished) return;
         const clickedId = f.properties.id as string; // bv. BE21
 
-        // In provincieronde: 10 provincies. In regiomodus: enkel leden van het gevraagde gewest.
+        // In provincieronde: 10 provincies. In regiomodus: elke Belgische provincie is klikbaar
+        // (ook buiten het gevraagde gewest), zodat foute kliks meetellen.
         const clickable = phase === "regions"
-            ? (question?.kind === "regions" && REGIONS[question.key].members.includes(clickedId))
+            ? Object.values(REGIONS).some(r => r.members.includes(clickedId))
             : ALLOWED_IDS.has(clickedId);
         if (!clickable) return;
 
@@ -229,11 +230,16 @@ export default function App() {
             setHighlights([clickedId]);
         } else {
             // regio: elke provincie binnen het gewest telt als juist
-            const members = REGIONS[question.key as RegionKey].members;
-            ok = members.includes(clickedId);
+            const targetMembers = REGIONS[question.key as RegionKey].members;
+            ok = targetMembers.includes(clickedId);
             resultKey = question.key;
-            // bij juist: highlight het volledige gewest, bij fout enkel de klik
-            setHighlights(ok ? members : [clickedId]);
+            // Highlight: bij juist → doelgewest; bij fout → het gewest van de aangeklikte provincie
+            if (ok) {
+                setHighlights(targetMembers);
+            } else {
+                const clickedRegion = Object.values(REGIONS).find(r => r.members.includes(clickedId));
+                setHighlights(clickedRegion ? clickedRegion.members : [clickedId]);
+            }
         }
 
         setAnswerState({id: clickedId, ok});
